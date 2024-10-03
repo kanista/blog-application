@@ -14,7 +14,6 @@ import lombok.Setter;
 public class UserDto {
     private Long id;
     private String name;
-    private String password;
     private String email;
     private Role role;
 
@@ -24,6 +23,6 @@ public class UserDto {
         this.name = user.getName();
         this.email = user.getEmail();
         this.role = user.getRole();
-        this.password = user.getPassword();
     }
+
 }
