@@ -2,9 +2,11 @@ package com.example.blog.util;
 
 import com.example.blog.entities.Role;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -14,9 +16,14 @@ import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private String SECRET_KEY = "your-secure-predefined-new-key-here";
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtil.class);
+
+    private final String SECRET_KEY = "your-secure-predefined-new-key-here";
+    private final long JWT_EXPIRATION = 86400000;
 
     public String extractUsername(String token) {
+        logger.info("Extracted Username: {}", extractClaim(token, Claims::getSubject)); // Should print the email
         return extractClaim(token, Claims::getSubject);
     }
 
@@ -26,8 +33,17 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+        try {
+            return Jwts.parser()
+                    .setSigningKey(SECRET_KEY.getBytes()) // Convert the key to bytes
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            logger.error("Invalid JWT token: {}", e.getMessage());
+            throw new JwtException("Invalid JWT token: " + e.getMessage(), e);
+        }
     }
+
 
     public String generateToken(String name, String email, Role role) {
         try {
@@ -37,6 +53,7 @@ public class JwtUtil {
             return createToken(claims, email);
         } catch (Exception e) {
             e.printStackTrace(); // Log the error for debugging
+            logger.error("Error generating JWT token: {}", e.getMessage());
             throw new RuntimeException("Token generation failed: " + e.getMessage());
         }
     }
@@ -47,14 +64,17 @@ public class JwtUtil {
                 .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
+                .setExpiration(new Date(new Date().getTime() + JWT_EXPIRATION))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY.getBytes())
                 .compact();
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public Boolean validateToken(String token, String username) {
+        final String extractedUsername = extractUsername(token);
+        Boolean tokenValid = extractedUsername.equals(username) && !isTokenExpired(token);
+        logger.info("Token Validation - Extracted Username: {}", extractedUsername);
+        logger.info("Token Validity: {}", tokenValid);
+        return tokenValid;
     }
 
     private Boolean isTokenExpired(String token) {

@@ -5,13 +5,15 @@ import com.example.blog.dto.RegisterRequestDto;
 import com.example.blog.dto.UserDto;
 import com.example.blog.service.AuthService;
 import exception.GlobalExceptionHandler;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
@@ -45,11 +47,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody @Valid RegisterRequestDto request) {
+    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody RegisterRequestDto request) {
         System.out.println("Received registration request: " + request);
         try {
             String jwt = authService.loginUser(request.getEmail(), request.getPassword());
-            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Login successful", jwt));
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwt); // Set token in the map
+            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Login successful", responseData));
         } catch (GlobalExceptionHandler.InvalidCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid email or password", null));
