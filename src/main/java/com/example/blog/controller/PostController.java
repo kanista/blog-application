@@ -48,7 +48,6 @@ public class PostController {
     }
 
 
-
     @PostMapping("/post")
     public ResponseEntity<CommonApiResponse> createPost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
 
@@ -111,6 +110,56 @@ public class PostController {
         }
     }
 
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<CommonApiResponse<Void>> deletePost(@PathVariable Long postId, HttpServletRequest request) {
+
+        try {
+            String email = validateTokenAndGetEmail(request);  // Validate the token and get the email
+
+            List<Post> userPosts = postService.getPostsByEmail(email);
+            postService.deletePost(postId, email);
+            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Post deleted successfully", null));
+        } catch (GlobalExceptionHandler.UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found.", null));
+        } catch (GlobalExceptionHandler.PostNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "Post not found.", null));
+        }catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred while deleting the post.", null));
+        }
+    }
+
+    @PutMapping("/posts/{postId}")
+    public ResponseEntity<CommonApiResponse<Post>> updatePost(@PathVariable Long postId,
+                                                              @RequestBody PostRequestDto postRequestDto,
+                                                              HttpServletRequest request) {
+
+        try {
+            String email = validateTokenAndGetEmail(request);
+            System.out.println("Email retrieved: " + email);
+
+            Post updatedPost = postService.updatePost(postId, postRequestDto, email);
+
+            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Post updated successfully", updatedPost));
+        } catch (GlobalExceptionHandler.UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found.", null));
+        } catch (GlobalExceptionHandler.PostNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "Post not found.", null));
+        }catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred while updating the post.", null));
+        }
+    }
 
 
 

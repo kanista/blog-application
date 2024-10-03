@@ -65,5 +65,39 @@ public class PostService {
         );
     }
 
+    // Delete a post by ID and email (only if the post belongs to the user)
+    public void deletePost(Long postId, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GlobalExceptionHandler.PostNotFoundException("Post not found"));
+
+        // Ensure the post belongs to the user
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new GlobalExceptionHandler.UnauthorizedAccessException("You are not allowed to delete this post.");
+        }
+
+        postRepository.delete(post);
+    }
+
+    // Update a post by ID and email (only if the post belongs to the user)
+    public Post updatePost(Long postId, PostRequestDto postRequestDto, String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new GlobalExceptionHandler.PostNotFoundException("Post not found"));
+
+        // Ensure the post belongs to the user
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new GlobalExceptionHandler.UnauthorizedAccessException("You are not allowed to update this post.");
+        }
+
+        post.setTitle(postRequestDto.getTitle());
+        post.setBody(postRequestDto.getBody());
+        post.setStatus(postRequestDto.getStatus());
+
+        return postRepository.save(post);  // Save the updated post
+    }
 }
