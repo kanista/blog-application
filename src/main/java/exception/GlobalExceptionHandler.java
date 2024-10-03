@@ -26,17 +26,29 @@ public class GlobalExceptionHandler {
                 .body(new CommonApiResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage(), null));
     }
 
+    @ExceptionHandler(PasswordMismatchException.class)
+    public ResponseEntity<CommonApiResponse> handlePasswordMismatchException(PasswordMismatchException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new CommonApiResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), null));
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<CommonApiResponse<Map<String, String>>> handleValidationExceptions(
             MethodArgumentNotValidException ex, WebRequest request) {
         Map<String, String> errors = new HashMap<>();
+
+        // Collect field-specific error messages
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errors.put(error.getField(), error.getDefaultMessage());
         });
-        return ResponseEntity.badRequest()
-                .body(new CommonApiResponse<>(HttpStatus.BAD_REQUEST.value(), "Validation failed", errors));
-    }
 
+        // Create a user-friendly message for the validation error
+        String userFriendlyMessage = "Your request contains invalid data. Please correct the following fields and try again.";
+
+        return ResponseEntity.badRequest()
+                .body(new CommonApiResponse<>(HttpStatus.BAD_REQUEST.value(), userFriendlyMessage, errors));
+    }
 
 
     // Custom exception classes
@@ -51,4 +63,11 @@ public class GlobalExceptionHandler {
             super(message);
         }
     }
+
+    public static class PasswordMismatchException extends RuntimeException {
+        public PasswordMismatchException(String message) {
+            super(message);
+        }
+    }
+
 }

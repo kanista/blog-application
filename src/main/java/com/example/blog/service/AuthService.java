@@ -6,13 +6,16 @@ import com.example.blog.entities.User;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.util.JwtUtil;
 import exception.GlobalExceptionHandler;
+import jakarta.validation.Valid;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 @Service
+@Validated
 public class AuthService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -31,9 +34,9 @@ public class AuthService implements UserDetailsService {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public UserDto registerUser(RegisterRequestDto request) {
+    public UserDto registerUser(@Valid RegisterRequestDto request) {
         if (!request.getPassword().equals(request.getConfirmPassword())) {
-            throw new RuntimeException("Passwords do not match");
+            throw new GlobalExceptionHandler.PasswordMismatchException("Passwords do not match");
         }
 
         User user = new User();
@@ -44,6 +47,7 @@ public class AuthService implements UserDetailsService {
         userRepository.save(user);
         return new UserDto(user); // Convert to DTO
     }
+
 
     public String loginUser(String email, String password) {
         User user = userRepository.findByEmail(email)

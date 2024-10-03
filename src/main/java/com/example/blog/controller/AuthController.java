@@ -1,13 +1,11 @@
 package com.example.blog.controller;
 
 import com.example.blog.dto.CommonApiResponse;
-import com.example.blog.dto.LoginRequestDto;
 import com.example.blog.dto.RegisterRequestDto;
 import com.example.blog.dto.UserDto;
 import com.example.blog.service.AuthService;
 import exception.GlobalExceptionHandler;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,11 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<CommonApiResponse<UserDto>> registerUser(@Valid @RequestBody RegisterRequestDto request) {
+    public ResponseEntity<CommonApiResponse<UserDto>> registerUser(@RequestBody RegisterRequestDto request) {
         System.out.println("Received registration request: " + request);
 
         if (authService.checkEmailExists(request.getEmail())) {
@@ -43,10 +44,8 @@ public class AuthController {
         }
     }
 
-
-
     @PostMapping("/login")
-    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody LoginRequestDto request) {
+    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody @Valid RegisterRequestDto request) {
         System.out.println("Received registration request: " + request);
         try {
             String jwt = authService.loginUser(request.getEmail(), request.getPassword());
@@ -58,12 +57,9 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found", null));
         } catch (Exception e) {
-            // Log the exception for debugging purposes
-            e.printStackTrace(); // This will print the stack trace in the console
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error: " + e.getMessage(), null));
         }
     }
-
 
 }

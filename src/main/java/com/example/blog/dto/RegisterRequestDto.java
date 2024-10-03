@@ -21,7 +21,9 @@ public class RegisterRequestDto {
     @NotBlank(message = "Password cannot be null or empty")
     private String password;
 
+    @NotBlank(message = "Confirm Password cannot be null or empty")
     private String confirmPassword;
+
     private String name;
     private Role role;
 }
