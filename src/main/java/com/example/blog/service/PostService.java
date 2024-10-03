@@ -4,6 +4,7 @@ import com.example.blog.dto.PostRequestDto;
 import com.example.blog.dto.PostResponseDto;
 import com.example.blog.dto.UserDto;
 import com.example.blog.entities.Post;
+import com.example.blog.entities.Status;
 import com.example.blog.entities.User;
 import com.example.blog.repository.PostRepository;
 import com.example.blog.repository.UserRepository;
@@ -100,4 +101,15 @@ public class PostService {
 
         return postRepository.save(post);  // Save the updated post
     }
+
+    // Get posts by status
+    public List<Post> getPostsByStatus(String email,Status status) {
+        // Find the user by email first
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
+
+        // Now find posts by the user's ID and status
+        return postRepository.findByUserIdAndStatus(user.getId(), status);
+    }
+
 }

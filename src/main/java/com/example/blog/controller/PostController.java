@@ -4,6 +4,7 @@ import com.example.blog.dto.CommonApiResponse;
 import com.example.blog.dto.PostRequestDto;
 import com.example.blog.dto.PostResponseDto;
 import com.example.blog.entities.Post;
+import com.example.blog.entities.Status;
 import com.example.blog.service.PostService;
 import com.example.blog.util.JwtUtil;
 import exception.GlobalExceptionHandler;
@@ -161,6 +162,23 @@ public class PostController {
         }
     }
 
+    @GetMapping("/posts/filter")
+    public ResponseEntity<CommonApiResponse<List<Post>>> getPostsByStatus(@RequestParam("status") Status status, HttpServletRequest request) {
+
+        try {
+            String email = validateTokenAndGetEmail(request);
+            System.out.println("Email retrieved: " + email);
+            // Call service to get posts by status
+            List<Post> filteredPosts = postService.getPostsByStatus(email,status);
+            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Posts filtered by status retrieved successfully", filteredPosts));
+        }catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
+        }  catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred while retrieving filtered posts.", null));
+        }
+    }
 
 
 }
