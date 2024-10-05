@@ -1,8 +1,9 @@
 package com.example.blog.controller;
 
 import com.example.blog.dto.CommonApiResponse;
-import com.example.blog.dto.RegisterRequestDto;
-import com.example.blog.dto.UserDto;
+import com.example.blog.dto.user.LoginRequestDto;
+import com.example.blog.dto.user.RegisterRequestDto;
+import com.example.blog.dto.user.UserDto;
 import com.example.blog.service.AuthService;
 import exception.GlobalExceptionHandler;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody RegisterRequestDto request) {
+    public ResponseEntity<CommonApiResponse> loginUser(@RequestBody LoginRequestDto request) {
         System.out.println("Received registration request: " + request);
         try {
             String jwt = authService.loginUser(request.getEmail(), request.getPassword());

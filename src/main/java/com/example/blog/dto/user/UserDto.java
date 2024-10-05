@@ -1,14 +1,10 @@
-package com.example.blog.dto;
+package com.example.blog.dto.user;
 
 import com.example.blog.entities.Role;
 import com.example.blog.entities.User;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserDto {

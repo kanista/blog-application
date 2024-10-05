@@ -1,6 +1,6 @@
 package com.example.blog.service;
 
-import com.example.blog.dto.CommentRequestDto;
+import com.example.blog.dto.comment.CommentRequestDto;
 import com.example.blog.entities.Comment;
 import com.example.blog.entities.Post;
 import com.example.blog.entities.User;

@@ -1,15 +1,11 @@
-package com.example.blog.dto;
+package com.example.blog.dto.user;
 
 import com.example.blog.entities.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisterRequestDto {
@@ -25,5 +21,6 @@ public class RegisterRequestDto {
     private String confirmPassword;
 
     private String name;
+
     private Role role;
 }

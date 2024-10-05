@@ -1,8 +1,8 @@
 package com.example.blog.controller;
 
 import com.example.blog.dto.CommonApiResponse;
-import com.example.blog.dto.PostRequestDto;
-import com.example.blog.dto.PostResponseDto;
+import com.example.blog.dto.post.PostRequestDto;
+import com.example.blog.dto.post.PostResponseDto;
 import com.example.blog.entities.Post;
 import com.example.blog.entities.Status;
 import com.example.blog.service.PostService;

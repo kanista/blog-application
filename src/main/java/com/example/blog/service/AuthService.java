@@ -1,7 +1,7 @@
 package com.example.blog.service;
 
-import com.example.blog.dto.RegisterRequestDto;
-import com.example.blog.dto.UserDto;
+import com.example.blog.dto.user.RegisterRequestDto;
+import com.example.blog.dto.user.UserDto;
 import com.example.blog.entities.User;
 import com.example.blog.repository.UserRepository;
 import com.example.blog.util.JwtUtil;

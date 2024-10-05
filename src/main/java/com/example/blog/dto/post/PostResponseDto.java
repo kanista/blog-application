@@ -1,14 +1,12 @@
-package com.example.blog.dto;
+package com.example.blog.dto.post;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.example.blog.dto.user.UserDto;
+import com.example.blog.dto.comment.CommentDto;
+import lombok.*;
 
 import java.util.List;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostResponseDto {

@@ -1,13 +1,9 @@
-package com.example.blog.dto;
+package com.example.blog.dto.post;
 
 import com.example.blog.entities.Status;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostRequestDto {
