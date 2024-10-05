@@ -1,5 +1,6 @@
 package com.example.blog.service;
 
+import com.example.blog.dto.CommentDto;
 import com.example.blog.dto.PostRequestDto;
 import com.example.blog.dto.PostResponseDto;
 import com.example.blog.dto.UserDto;
@@ -54,17 +55,32 @@ public class PostService {
     }
 
     private PostResponseDto mapToPostResponseDto(Post post) {
+        // Map User to UserDto
         User user = post.getUser();
-        UserDto userDto = new UserDto(user.getId(), user.getName(), user.getEmail(),user.getRole());
+        UserDto userDto = new UserDto(user.getId(), user.getName(), user.getEmail(), user.getRole());
 
+        // Map Comments to CommentDto List
+        List<CommentDto> commentDtos = post.getComments()
+                .stream()
+                .map(comment -> new CommentDto(
+                        comment.getId(),
+                        comment.getBody(),
+                        comment.getCreatedAt(),
+                        new UserDto(comment.getUser().getId(), comment.getUser().getName(), comment.getUser().getEmail(), comment.getUser().getRole())
+                ))
+                .collect(Collectors.toList());
+
+        // Return the PostResponseDto with comments
         return new PostResponseDto(
                 post.getId(),
                 post.getTitle(),
                 post.getBody(),
                 post.getStatus().toString(),
-                userDto
+                userDto,
+                commentDtos  // Include the list of comment DTOs
         );
     }
+
 
     // Delete a post by ID and email (only if the post belongs to the user)
     public void deletePost(Long postId, String email) {

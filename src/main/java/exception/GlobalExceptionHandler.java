@@ -79,6 +79,13 @@ public class GlobalExceptionHandler {
         }
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class CommentNotFoundException extends RuntimeException {
+        public CommentNotFoundException(String message) {
+            super(message);
+        }
+    }
+
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public static class UnauthorizedAccessException extends RuntimeException {
         public UnauthorizedAccessException(String message) {

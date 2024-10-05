@@ -1,22 +1,17 @@
 package com.example.blog.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostResponseDto {
+public class CommentDto {
     private Long id;
-    private String title;
     private String body;
-    private String status;
+    private LocalDateTime createdAt;
     private UserDto user;
-    private List<CommentDto> comment;
-
 }
