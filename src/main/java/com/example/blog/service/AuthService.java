@@ -31,6 +31,7 @@ public class AuthService implements UserDetailsService {
 
     // Method to check if email already exists
     public boolean checkEmailExists(String email) {
+
         return userRepository.findByEmail(email).isPresent();
     }
 

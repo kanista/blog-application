@@ -59,6 +59,13 @@ public class GlobalExceptionHandler {
         }
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class EmailAlreadyExistsException extends RuntimeException {
+        public EmailAlreadyExistsException(String message) {
+            super(message);
+        }
+    }
+
     public static class InvalidCredentialsException extends RuntimeException {
         public InvalidCredentialsException(String message) {
             super(message);
