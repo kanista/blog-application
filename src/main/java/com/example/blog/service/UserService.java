@@ -38,4 +38,12 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    public UserDto getUserProfile(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
+
+        return new UserDto(user.getId(), user.getName(), user.getEmail(), user.getRole());
+    }
+
+
 }

@@ -79,4 +79,22 @@ public class UserController {
         }
     }
 
+    @GetMapping("")
+    public ResponseEntity<CommonApiResponse<UserDto>> getUserProfile(HttpServletRequest request) {
+        String email = validateTokenAndGetEmail(request);
+
+        try {
+            UserDto userDto = userService.getUserProfile(email);
+            return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Profile retrieved successfully", userDto));
+        } catch (GlobalExceptionHandler.UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found", null));
+        }catch (JwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred", null));
+        }
+    }
 }
