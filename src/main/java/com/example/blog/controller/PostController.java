@@ -5,6 +5,7 @@ import com.example.blog.dto.post.PostRequestDto;
 import com.example.blog.dto.post.PostResponseDto;
 import com.example.blog.entities.Post;
 import com.example.blog.entities.Status;
+import com.example.blog.service.ImageUploadService;
 import com.example.blog.service.PostService;
 import com.example.blog.util.JwtUtil;
 import exception.GlobalExceptionHandler;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,13 +26,15 @@ public class PostController {
 
     private final PostService postService;
     private final JwtUtil jwtUtil;
+    private final ImageUploadService imageUploadService;
 
-    private PostController(PostService postService, JwtUtil jwtUtil) {
+    private PostController(PostService postService, JwtUtil jwtUtil, ImageUploadService imageUploadService) {
         this.postService = postService;
         this.jwtUtil = jwtUtil;
+        this.imageUploadService = imageUploadService;
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(PostController.class);
+//    private static final Logger logger = LoggerFactory.getLogger(PostController.class);
 
     private String validateTokenAndGetEmail(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
@@ -50,14 +54,21 @@ public class PostController {
 
 
     @PostMapping("/post")
-    public ResponseEntity<CommonApiResponse> createPost(@RequestBody PostRequestDto postRequestDto, HttpServletRequest request) {
-
+    public ResponseEntity<CommonApiResponse> createPost(@RequestPart("post") PostRequestDto postRequestDto,
+                                                        @RequestPart("image") MultipartFile image,
+                                                        HttpServletRequest request) {
 
         try {
-
             String email = validateTokenAndGetEmail(request);
-            System.out.println("Email retrieved: " + email);
-            Post createdPost = postService.createPost(postRequestDto, email);
+            String imageUrl = null;
+
+            // Handle image upload if present
+            if (!image.isEmpty()) {
+                imageUrl = imageUploadService.uploadImage(image);
+            }
+
+            // Create the post with the image URL
+            Post createdPost = postService.createPost(postRequestDto, email, imageUrl);
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(new CommonApiResponse<>(HttpStatus.CREATED.value(), "Post created successfully", createdPost));
@@ -65,7 +76,7 @@ public class PostController {
         } catch (GlobalExceptionHandler.UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "User not found", null));
-        }catch (JwtException e) {
+        } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
         } catch (Exception e) {
@@ -73,6 +84,7 @@ public class PostController {
                     .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred", null));
         }
     }
+
 
     @GetMapping("/posts")
     public ResponseEntity<CommonApiResponse<List<PostResponseDto>>> getAllPosts(HttpServletRequest request) {
@@ -137,14 +149,15 @@ public class PostController {
 
     @PutMapping("/posts/{postId}")
     public ResponseEntity<CommonApiResponse<Post>> updatePost(@PathVariable Long postId,
-                                                              @RequestBody PostRequestDto postRequestDto,
+                                                              @RequestPart("post") PostRequestDto postRequestDto,
+                                                              @RequestPart(value = "image", required = false) MultipartFile image,
                                                               HttpServletRequest request) {
 
         try {
             String email = validateTokenAndGetEmail(request);
             System.out.println("Email retrieved: " + email);
 
-            Post updatedPost = postService.updatePost(postId, postRequestDto, email);
+            Post updatedPost = postService.updatePost(postId, postRequestDto, email, image);
 
             return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Post updated successfully", updatedPost));
         } catch (GlobalExceptionHandler.UserNotFoundException e) {
@@ -153,7 +166,7 @@ public class PostController {
         } catch (GlobalExceptionHandler.PostNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new CommonApiResponse<>(HttpStatus.NOT_FOUND.value(), "Post not found.", null));
-        }catch (JwtException e) {
+        } catch (JwtException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new CommonApiResponse<>(HttpStatus.UNAUTHORIZED.value(), "Invalid token.", null));
         } catch (Exception e) {
@@ -161,6 +174,7 @@ public class PostController {
                     .body(new CommonApiResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "An error occurred while updating the post.", null));
         }
     }
+
 
     @GetMapping("/posts/filter")
     public ResponseEntity<CommonApiResponse<List<Post>>> getPostsByStatus(@RequestParam("status") Status status, HttpServletRequest request) {

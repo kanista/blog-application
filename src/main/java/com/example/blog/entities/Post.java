@@ -27,6 +27,9 @@ public class Post {
     @Enumerated(EnumType.STRING)
     private Status status;  // Published or Draft
 
+    @Column
+    private String imageUrl;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;  // The user who created the post

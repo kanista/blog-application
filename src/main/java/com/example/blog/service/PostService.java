@@ -11,7 +11,9 @@ import com.example.blog.repository.PostRepository;
 import com.example.blog.repository.UserRepository;
 import exception.GlobalExceptionHandler;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,13 +22,15 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ImageUploadService imageUploadService;
 
-    public PostService(PostRepository postRepository, UserRepository userRepository) {
+    public PostService(PostRepository postRepository, UserRepository userRepository, ImageUploadService imageUploadService) {
         this.postRepository = postRepository;
         this.userRepository = userRepository;
+        this.imageUploadService = imageUploadService;
     }
 
-    public Post createPost(PostRequestDto postRequestDto, String email) {
+    public Post createPost(PostRequestDto postRequestDto, String email, String imageUrl) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
 
@@ -35,6 +39,7 @@ public class PostService {
         post.setBody(postRequestDto.getBody());
         post.setStatus(postRequestDto.getStatus());
         post.setUser(user);
+        post.setImageUrl(imageUrl);
 
         return postRepository.save(post);
     }
@@ -76,6 +81,7 @@ public class PostService {
                 post.getTitle(),
                 post.getBody(),
                 post.getStatus().toString(),
+                post.getImageUrl(),
                 userDto,
                 commentDtos  // Include the list of comment DTOs
         );
@@ -99,7 +105,7 @@ public class PostService {
     }
 
     // Update a post by ID and email (only if the post belongs to the user)
-    public Post updatePost(Long postId, PostRequestDto postRequestDto, String email) {
+    public Post updatePost(Long postId, PostRequestDto postRequestDto, String email, MultipartFile image) throws IOException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new GlobalExceptionHandler.UserNotFoundException("User not found"));
 
@@ -111,12 +117,20 @@ public class PostService {
             throw new GlobalExceptionHandler.UnauthorizedAccessException("You are not allowed to update this post.");
         }
 
+        // Update the post details
         post.setTitle(postRequestDto.getTitle());
         post.setBody(postRequestDto.getBody());
         post.setStatus(postRequestDto.getStatus());
 
-        return postRepository.save(post);  // Save the updated post
+        // Handle image upload if present
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = imageUploadService.uploadImage(image);
+            post.setImageUrl(imageUrl);  // Update the image URL
+        }
+
+        return postRepository.save(post);
     }
+
 
     // Get posts by status
     public List<Post> getPostsByStatus(String email,Status status) {

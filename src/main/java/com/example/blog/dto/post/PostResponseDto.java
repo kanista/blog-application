@@ -14,6 +14,7 @@ public class PostResponseDto {
     private String title;
     private String body;
     private String status;
+    private String imageUrl;
     private UserDto user;
     private List<CommentDto> comment;
 
