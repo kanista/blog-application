@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import static org.springframework.security.config.Customizer.withDefaults;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -30,7 +32,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .csrf(csrf -> csrf.disable())
+                .cors(withDefaults())  // Enable CORS configuration (applies the CORS settings from WebConfig)
+                .csrf(csrf -> csrf.disable())  // Disable CSRF protection since JWT tokens handle it
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register","/auth/login","/admin/register","/uploads/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

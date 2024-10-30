@@ -11,9 +11,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000")  // Allow frontend origin
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH")
-                .allowedHeaders("Authorization", "Content-Type")
+                .allowedOrigins("http://localhost:3000")  // Ensure the frontend origin is correct here
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")  // Include OPTIONS for preflight
+                .allowedHeaders("Authorization", "Content-Type", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin")
                 .allowCredentials(true)
                 .exposedHeaders("Authorization");
     }
@@ -24,5 +24,4 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:" + System.getProperty("user.dir") + "/uploads/");
     }
-
 }
