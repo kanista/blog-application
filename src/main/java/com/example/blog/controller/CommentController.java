@@ -1,7 +1,9 @@
 package com.example.blog.controller;
 
+import com.example.blog.dto.comment.CommentDto;
 import com.example.blog.dto.comment.CommentRequestDto;
 import com.example.blog.dto.CommonApiResponse;
+import com.example.blog.dto.user.UserDto;
 import com.example.blog.entities.Comment;
 import com.example.blog.service.CommentService;
 import com.example.blog.util.JwtUtil;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -112,9 +115,17 @@ public class CommentController {
 
     // Get all comments for a specific post
     @GetMapping("/post/{postId}")
-    public ResponseEntity<CommonApiResponse<List<Comment>>> getCommentsByPostId(@PathVariable Long postId) {
+    public ResponseEntity<CommonApiResponse<List<CommentDto>>> getCommentsByPostId(@PathVariable Long postId) {
         try {
-            List<Comment> comments = commentService.getCommentsByPostId(postId);
+            List<CommentDto> comments = commentService.getCommentsByPostId(postId).stream()
+                    .map(comment -> new CommentDto(
+                            comment.getId(),
+                            comment.getBody(),
+                            comment.getCreatedAt(),
+                            new UserDto(comment.getUser().getId(), comment.getUser().getName(), comment.getUser().getEmail(),comment.getUser().getRole())
+                    ))
+                    .collect(Collectors.toList());
+
             return ResponseEntity.ok(new CommonApiResponse<>(HttpStatus.OK.value(), "Comments retrieved successfully", comments));
         } catch (GlobalExceptionHandler.PostNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
